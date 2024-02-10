@@ -183,7 +183,7 @@ Stage นี้จึงเป็น stage สุดท้ายของ Boot P
 
 > <img src="assets/profiles/soso_picture.jpg" width="25%"><br>
 > 65070<br>
-> Duty: Task Scheduler
+> Duty: Task Scheduler / Project Manager
 
 > <img src="assets/profiles/" width="25%"><br>
 > 65070130 นายปรเมศร์ เชื้อทอง<br>
@@ -191,7 +191,7 @@ Stage นี้จึงเป็น stage สุดท้ายของ Boot P
 
 > <img src="assets/profiles/" width="25%"><br>
 > 65070162 นายพีรวิชญ์ พิชญธาดาพงศ์<br>
-> Duty: Overview / บทคัดย่อ / คำนำ / Markdown Document / GitHub
+> Duty: Overview / บทคัดย่อ / คำนำ / เรียบเรียง
 
 > <img src="assets/profiles/" width="25%"><br>
 > 65070163 นายพีระวัฒน์ พันธ์ยนต์<br>
