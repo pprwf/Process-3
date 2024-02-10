@@ -125,5 +125,8 @@
         * strace -p 1234: ติดตามการเรียก system call ของกระบวนการที่มี PID 1234
         * ltrace -p 1234: ติดตามการเรียก library function ของกระบวนการที่มี PID 1234
 
-
+## References
+* <a href="https://www.scaler.com/topics/process-management-in-linux/">web1</a>
+* <a href="https://www.digitalocean.com/community/tutorials/process-management-in-linux">web2</a>
+* <a href="https://unstop.com/blog/process-management-in-linux">web3</a>
 
