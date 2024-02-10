@@ -40,7 +40,7 @@
 - [บทคัดย่อ](#บทคัดย่อ)🧾
 - [คำนำ](#คำนำ)📖
 - [Overview](#overview-of-computer-process)🧑‍💻
-- [Boots Process](#⚙boots-process)⚙️
+- [Boots Process](#boots-process)⚙️
 	- [BIOS (Basic Input/Output System)](#bios)
 	- [MBR (Master Boot Record)](#mbr)
 	- [GRUB (Grand Unified Bootloader)](#grub)
