@@ -79,8 +79,8 @@
 **MBR** (หรือ **Master Boot Record**) เป็นพื้นที่จัดเก็บ Boot Loader Code (อยู่บริเวณ Sector แรกของ Drive) และเป็นที่อยู่ของข้อมูลที่เกี่ยวกับ **GRUB** (หรือ **LILO** ในระบบที่ค่อนข้างเก่า)  
 
 <font size=1 ><p align="center">
-	<img src="assets/MBR.png" /><br />
-	ภาพจาก : [https://www.youtube.com/watch?v=XpFsMB6FoOs](https://www.youtube.com/watch?v=XpFsMB6FoOs&t=214s)</p></font>
+	<img src="" />
+</font>
 
 โดยหน้าที่หลักของ MBR คือการโหลด GRUB มา Executes 
 MBR มีขนาด 512 bytes ประกอบไปด้วย 3 ส่วน
