@@ -55,14 +55,45 @@
 - [Task Scheduler](#task-scheduler)⏳
   	- [cron](#cron)
   	- [crontab](#crontab)
-  	- [cronjab Syntax](#cronjab-syntax)
   	- [at](#at)
-  	- [at Syntax](#at-syntax-&-usage)
   	- [Time Format](#time-format)
 - [References](#references)🔗
 - [Group Member](#member)👪
 
 ## 🧑‍💻Overview of Computer Process
+
+Process หมายถึง โปรแกรมที่กำลังจะถูกประมวลผล หรือกำลังจะถูกทำการ Execute โดยจะ Execute เข้าไปใน RAM
+
+ซึ่งการ Process จะมีสิ่งที่เรียกว่า Process State (กระบวนการทำงานในแต่ละขั้นของการ Process ในระหว่างที่ Program กำลังจะถูก Execute)
+
+### Process State
+
+Process State มีขั้นตอนที่เป็นส่วนประกอบอยู่ด้วยทั้งหมด 5 ส่วน ได้แก่
+1. new : บ่งบอกถึง ได้ทำการสร้าง หรือจองพื้นที่ใน memory แล้ว
+2. ready : เป็นส่วนของการรอ processor ที่จะทำการดึงคำสั่งไปใช้ในการ execute
+3. running : คำสั่งนั้น กำลังจะถูก execute
+4. waiting : เป็นการรอคำสั่งอื่นให้เกิดขึ้นก่อน
+5. terminate : process ได้ถูก execute เรียบร้อยแล้ว
+
+```mermaid
+sequenceDiagram
+new ->> ready: admitted
+ready ->> running: scheduler dispatch
+running ->> ready: interrupt
+running ->> waiting: I/O or event wait
+waiting ->> ready: I/O or event completion
+running ->> terminated: exit
+```
+
+1. เริ่มต้นต้องทำการสร้าง Process new ก่อน โดย Process มีสถานะเป็น new ก็ต่อเมื่อถูกสร้างขึ้นมา โดยการจองพื้นที่บน Memory
+2. เมื่อกลายเป็น Process new แล้ว จะเปลี่ยนสถานะเป็น ready โดยจะทำการเปลี่ยนก็ต่อเมื่อ Process ถูกรับเข้ามาในคิว เพื่อรอทำงาน
+3. ต่อมาเป็นการ running โดย Process ready จะเปลี่ยนเป็น running ก็ต่อเมื่อในคิวถูกส่งไปทำงานบน CPU
+4. เมื่อ running อยู่ถึงคำสั่งสุดท้ายแล้ว Process จะถูกสั่ง terminate ซึ่งก็คือ จบ Process ทันที
+	- ถ้า running แล้วถูกสั่งด้วยคำสั่ง input output อื่นๆ ก็จะถูกส่งไปที่สถานะ waiting
+	- Process ใดๆ ที running อยู่ จะเปลี่ยนสถานะเป็น ready ก็ต่อเมื่อเกิดการ interrupt จาก short term schedulers หรือ I/O request
+	- เมื่อขอใช้ I/O และ waiting อยู่ จะย้ายจาก waiting เป็น ready ก็ต่อเมื่อได้รับข้อมูล I/O request นั้นๆเีรียบร้อยแล้ว
+
+โดยที่แต่ละ process จะมี PID (Process ID) ที่ไม่ซ้ำกัน และทำงานแยกกัน ไม่รบกวนกัน
 
 ## ⚙Boot Process
 
@@ -313,6 +344,301 @@ Stage นี้จึงเป็น stage สุดท้ายของ Boot P
 
 ## 🤝Services Manager
 
+เป็น Process ที่ทำงานอยู่บน Server ตลอดเวลา รอการใช้งานหรือการดำเนินงานตาม Tasks มักจะถูกใช้ในการจัดการ Requests ไม่ว่าจะเป็นจาก Process อื่น ๆ หรือเครื่อง Clients อื่น ๆ
+
+### systemd
+
+systemd เป็นตัวจัดการ Service สำหรับระบบปฏิบัติการ Linux ถูกออกแบบมาให้มี Backward Compatible กับ System V มีฟีเจอร์เช่น Socket & D-Bus
+
+#### Units
+
+ใน systemd นั้น Target ของคำสั่งต่าง ๆ จะถูกเรียกว่า Units ซึ่งเป็น Resources ที่ systemd จัดการได้ Units จะถูกแบ่งกลุ่มตามประเภทของ Resources ที่ถูกกำหนดไว้ใน Unit Configuration Files
+
+| Unit Type      | File extension |
+| -------------- | -------------- |
+| Service unit   | .service       |
+| Target unit    | .target        |
+| Automount unit | .automount     |
+| Device unit    | .device        |
+| Mount unit     | .mount         |
+| Path unit      | .path          |
+| Scope unit     | .scope         |
+| Slice unit     | .slice         |
+| Socket unit    | .swap          |
+| Timer unit     | .timer         |
+
+#### การจัดการ System Service
+
+systemd มีคำสั่ง systemctl ที่ใช้ในการ Start, Stop, Restart, View, Enable, และ Disable System Services
+
+| systemd command                                 | Description                                                                |
+| ----------------------------------------------- | -------------------------------------------------------------------------- |
+| systemctl start network.service                 | เริ่มการทำงานของ Service                                                  |
+| systemctl stop network.service                  | หยุดการทำงานของ Service                                                   |
+| systemctl restart network.service               | Restart การทำงานของ Service                                               |
+| systemctl reload network.service                | Reloads ไฟล์ Configuration โดยไม่ขัดการทำงานของ Operation                  |
+| systemctl condrestart network.service           | รีสตาร์ท Service หาก Service กำลังทำงานอยู่                            |
+| systemctl status network.service                | ตรวจสอบสถานะการทำงานของ Service                                                |
+| systemctl enable network.service                | Enable[^1] Service เมื่อเงื่อนไขที่ถูกตั้งเอาไว้เป็นจริง                     |
+| systemctl disable network.service               | Disable Service เมื่อเงื่อนไขที่ถูกตั้งเอาไว้เป็นจริง                      |
+| systemctl is-enabled network.service            | ตรวจสอบว่า Service นั้นถูกเปิดการใช้งานอยู่หรือไม่                             |
+| systemctl list-unit-files \-\-type=service      | แสดง Lists ของ Services ในแต่ละ Run Level ว่าเปิดการใช้งานอยู่หรีอไม่ |
+| ls /etc/systemd/system/\*.wants/network.service | แสดง Lists ของ Run Level ที่เปิดการใช้งานและ Eun Level ที่ปิดการใช้งานอยู่ |
+| systemctl daemon-reload                         | ใช้เมื่อต้องการสร้าง Service File หรือเปลี่ยนการตั้งค่า                    |
+
+[^1]: Enable ทำให้ Service ทำงานอัตโนมัติเมื่อ boot ขึ้นมา ในขณะที่ Start จะเป็นการเริ่มการทำงานของ Service ในทันที
+
+### Listing Service
+
+ใช้คำสั่งต่อไปนี้ในการแสดง List ของ Service ที่ถูก Load อยู่
+
+```bash
+systemctl list-units --type service
+```
+
+ถ้าหากต้องการแสดง List ของ Service ทั้งหมดไม่ว่าจะถูก Load หรือไม่
+
+```bash
+systemctl list-units --type service --all
+```
+
+ผลลัพธ์ที่ได้ :
+```bash
+$ systemctl list-units --type service
+UNIT                        LOAD   ACTIVE     SUB           DESCRIPTION
+atd.service                 loaded active     running       Deferred execution scheduler
+auditd.service              loaded active     running       Security Auditing Service
+avahi-daemon.service        loaded active     running       Avahi mDNS/DNS-SD Stack
+chronyd.service             loaded active     running       NTP client/server
+crond.service               loaded active     running       Command Scheduler
+dbus.service                loaded active     running       D-Bus System Message Bus
+dracut-shut down.service    loaded active     exited        Restore /run/initramfs on shut down
+firewalld.service           loaded active     running       firewalld - dynamic firewall daemon
+getty@tty1.service          loaded active     running       Getty on tty1
+gssproxy.service            loaded active     running       GSSAPI Proxy Daemon
+......			    ......	      ......	    ......
+```
+
+#### แสดง Status ของ Service
+
+```bash
+systemctl status name.service
+```
+
+เป็นคำสั่งในการแสดง Status
+
+**ตัวอย่างการใช้คำสั่ง systemctl status gdm.service**
+
+```bash
+$ systemctl status gdm.service
+gdm.service - GNOME Display Manager
+	Loaded: loaded (/usr/lib/systemd/system/gdm.service; enabled)
+	Active: active (running) since Thu 2013-10-17 17:31:23 CEST; 5min ago
+Main PID: 1029 (gdm)
+	CGroup: /system.slice/gdm.service
+		├─1029 /usr/sbin/gdm
+		├─1037 /usr/libexec/gdm-simple-slave --display-id /org/gno...
+		└─1047 /usr/bin/Xorg :0 -background none -verbose -auth /r...Oct 17 17:31:23 localhost systemd[1]: Started GNOME Display Manager.
+```
+<br>
+
+| Parameter | Description                                                               |
+| --------- | ------------------------------------------------------------------------- |
+| Loaded    | บอกว่า Service ถูกโหลดหรือยัง ตามด้วย Path ไปหา Service ตามด้วยสภานะการ Enable |
+| Active    | บอกว่า service กำลังรันอยู่หรือไม่ และตามด้วย Timestamp                           |
+| Main PID  | Process Identification Number                                             |
+| Cgroup    | Control Group[^2] ของ Service                                               |
+
+[^2]: Control Group เป็น Feature ของ Kernel ที่ทำให้ Process ถูกจัดเรียงแบบ Hierarchical ซึ่งทำให้สามารถจัดการ Resource ได้ดีกว่า
+
+#### ตรวจสอบว่า service กำลังรันอยู่หรือไม่
+
+```bash
+systemctl is-active name.service
+```
+
+ผลลัพธ์ที่ได้จะออกมาดังนี้
+
+| Parameter       | Description                                                    |
+| --------------- | -------------------------------------------------------------- |
+| active(running) | Service ที่กำลังรันอยู่                                        |
+| active(exited)  | Service ทำงานจบแล้ว                                            |
+| active(waiting) | Service กำลังรอที่จะทำงานขั้นต่อไปอยู่ อาจจะเกิดจากการรอข้อมูล |
+| inactive        | Service ไม่ได้กำลังรันอยู่                                     |
+
+#### การ Start Service
+
+ในการ Start Service ใช้คำสั่ง **systemctl start name.service** เช่น
+```bash
+    systemctl start httpd.service
+    // เริ่มการทำงานของ httpd Service
+```
+
+#### หยุดการทำงานของ Service
+
+สามารถหยุดการทำงานของ Service ได้ด้วยคำสั่ง **systemctl stop name.service** เช่น
+```bash
+    systemctl stop bluetooth.service
+    // หยุดการทำงานของ bluetooth service
+```
+
+#### Restart Service
+```bash
+    systemctl restart bluetooth.service
+    // รีสตาร์ทการทำงานของ bluetooth service
+```
+
+คำสั่งนี้จะหยุดการทำงานของ service แล้ว start ใหม่ทันที, ถ้าหาก service ไม่ได้กำลังรันอยู่แล้วก็จะรันขึ้นมาให้
+
+#### การทำให้ Service Enable
+
+สามารถทำได้ด้วยการใช้คำสั่ง **systemctl enable name.service** เช่น
+```bash
+    systemctl enable httpd.service
+    ln -s '/usr/lib/systemd/system/httpd.service' '/etc/systemd/system/multi-user.target.wants/httpd.service'
+```
+
+#### การ Disable service
+
+ใช้คำสั่ง **systemctl disable name.service**
+```bash
+    systemctl disable bluetooth.service
+    Removed /etc/systemd/system/bluetooth.target.wants/bluetooth.service.
+    Removed /etc/systemd/system/dbus-org.bluez.service.
+```
+
+### การเปลี่ยน Run Level
+
+ใน systemd, มีการใช้งาน systemd target มาแทนที่การใช้งาน Run Levels เพื่อความยืดหยุ่นในการใช้งาน เช่น สืบทอด Target แล้วแปลงให้เป็น Target ของเราเองโดยการเพิ่ม Service อื่น ๆ เข้าไป
+
+**ตารางแสดงการเปรียบเทียบระหว่าง Run Level กับ Target**
+
+| Run Level    | systemd Target                                        | Description    |
+| ------------ | ----------------------------------------------------- | -------------- |
+| 0            | runlevel0.target, poweroff.target                     | OS ปิดอยู่        |
+| 1, s, Single | runlevel1.target, rescue.target                       | OS อยู่ในโหมด Single User |
+| 2, 4         | runlevel2.target, runlevel4.target, multi-user.target | OS อยู่ใน Run Level แบบ User-Define หรือ Domain-Specific (โดยปกติแล้วจะเทียบเท่า Run Level 3) |
+| 3            | runlevel3.target, multi-user.target                   | OS อยู่ในโหมด Multi-User แบบ Non-Graphical[^3] และระบบสามารถ Access ได้ผ่านเครือข่าย |
+| 5            | runlevel5.target, graphical.target                    | OS อยู่ในโหมด Multi-User แบบเป็น Graphical, Service จาก Level 3 สามารถใช้งานได้ผ่านการ Login |
+| 6            | runlevel6.target, reboot.targe                        | OS ทำการ Reboot |
+
+[^3]: Non-Graphical คือ ไม่มี GUI, User ต้องใช้งานผ่าน Interface ที่เป็น Text หรือ Command Line
+
+#### ดู Default Startup Target ของระบบ
+
+ใช้คำสั่งต่อไปนี้ในการดู default startup target ของระบบ
+```bash
+    systemctl get-default
+```
+
+#### ดู Startup Target ทั้งหมด
+
+ใช้คำสั่งต่อไปนี้ในการดู Startup Target ทั้งหมดของระบบ
+```bash
+    systemctl list-units --type=target
+```
+
+#### เปลี่ยน Default Target
+
+เพื่อเปลี่ยน Default Target สามารถคำสั่งนี้ด้วย Root User
+```bash
+    systemctl set-default name.target
+```
+
+#### เปลี่ยน target ปัจจุบัน
+```bash
+    systemctl isolate name.target
+```
+
+#### เปลี่ยนไปที่ Rescue Mode
+
+รันคำสั่งนี้ด้วย root user
+```bash
+    systemctl rescue
+```
+\* คำสั่งนี้ทำงานคล้ายกับ systemctl isolate rescue.target, หลังการ Execute จะแสดงข้อความต่อไปนี้ใน Serial Port
+```bash
+    	You are in rescue mode. After logging in, type "journalctl -xb" to viewsystem logs, "systemctl reboot" to reboot,
+	"systemctl default" or "exit"to boot into default mode.
+
+    	Give root password for maintenance
+    	(or press Control-D to continue):
+```
+
+#### Changing to Emergency Mode
+
+รันคำสั่งนี้ด้วย Root User
+```bash
+    systemctl emergency
+```
+
+\* คำสั่งนี้ทำงานคล้ายกับ systemctl isolate emergency.target, หลังการ execute จะแสดงข้อความต่อไปนี้ใน serial port
+
+```bash
+    You are in emergency mode. After logging in, type "journalctl -xb" to viewsystem logs, "systemctl reboot" to reboot, "systemctl default" or "exit"to boot into default mode.
+
+    Give root password for maintenance
+    (or press Control-D to continue):
+```
+
+### การ Shut down, Suspend, Hibernate ระบบ OS
+
+#### systemctl Command
+
+systemd ใช้คำสั่ง systemctl ในการ Shutdown, Suspend และ Hibernate ระบบ OS, แต่ก็ยังสามารถใช้คำสั่งพวก Linux System Management ได้อยู่
+
+| Linux Management Command | systemctl Command  | Description                             |
+| ------------------------ | ------------------ | --------------------------------------- |
+| Halt                     | systemctl halt     | หยุด process ทั้งหมดและ shut down ระบบ OS |
+| Power Off                | systemctl poweroff | ปิด OS ด้วยสัญญาณ ACPI                   |
+| Reboot                   | systemctl reboot   | Reboot ระบบ OS                          |
+
+#### การ Shutdown ระบบ OS
+
+ในการ Shutdown ระบบ OS และปิด (Power Off) ระบบ OS, รันคำสั่งต่อไปนี้ด้วย Root User
+```bash
+    systemctl poweroff
+```
+ในการ Shutdown ระบบ OS โดยไม่ปิด ให้รันคำสั่งต่อไปนี้ด้วย Root User
+```bash
+    systemctl halt
+```
+โดยทั่วไปแล้ว การรันคำสั่ง 2 คำสั่งนี้จะทำให้ systemd ส่ง Message ไปหา Login user ทั้งหมด หากไม่ต้องการให้ systemd ส่ง Message ให้รันคำสั่งโดยมี --no-wall ด้วย
+```bash
+    systemctl --no-wall poweroff
+```
+
+#### การ Restart OS
+
+ในการ Restart ระบบ OS ให้รันคำสั่งนี้ด้วย Root User
+```bash
+    systemctl reboot
+```
+
+โดยทั่วไปแล้ว การรันคำสั่งนี้จะทำให้ systemd ส่ง Message ไปหา Login User ทั้งหมด ถ้าไม่ต้องการให้ systemd ส่ง Message ให้รันคำสั่งโดยมี --no-wall ด้วย
+```bash
+    systemctl --no-wall reboot
+```
+
+#### การ Suspend ระบบ OS
+
+รันคำสั่งต่อไปนี้ด้วย Root User
+```bash
+    systemctl suspend
+```
+
+#### การ Hibernate ระบบ OS
+
+รันคำสั่งต่อไปนี้ด้วย Root User
+```bash
+    systemctl hibernate
+```
+
+หากต้องการจะ Hibernate OS และ Suspend OS ด้วย ให้ใช้คำสั่งนี้ด้วย Root User
+```bash
+    systemctl hybrid-sleep
+```
+
 ## ⏳Task Scheduler
 
 Linux มีตัวช่วยสำคัญในการทำงานตามคำสั่งโดยอัตโนมัติ ที่เรียกว่า _Task Scheduler_ เพื่อช่วยแก้ไขปัญหาที่ผู้ใช้งานจะต้องมาสั่งทำงานตาม Command ด้วยตัวเองตลอดเวลา โดยที่ Task Scheduler จะทำหน้าที่เสมือนตัวตั้งเวลา เพื่อตั้งเวลาสั่งให้ OS (Operating System) สามารถรับคำสั่งต่าง ๆ ที่ผู้ใช้งานต้องการได้เมื่อถึงเวลาที่กำหนดเอาไว้
@@ -455,6 +781,8 @@ at -r (เลขประจำ job)
 
 ## 🔗References
 
+- **Overview**
+  	1. "Process State", Nutchasan Jantarah, Medium, Sep 4 2018, [Online]. Available: [เรามาเข้าใจ Process กันดีกว่า](https://do-nutchasan.medium.com/%E0%B9%80%E0%B8%A3%E0%B8%B2%E0%B8%A1%E0%B8%B2%E0%B9%80%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B9%83%E0%B8%88-process-%E0%B8%81%E0%B8%B1%E0%B8%99%E0%B8%94%E0%B8%B5%E0%B8%81%E0%B8%A7%E0%B9%88%E0%B8%B2-part-1-f2cba7aa81c)
 - **Boot Process**
 	1. "Boot Process Fundamental", Bhuridech Sudsee, Medium, Jun 25 2017, [Online]. Available: [กระบวนการเริ่มทำงานของ Linux (Boot process)](https://aorjoa.medium.com/กระบวนการเริ่มทำงานของ-linux-boot-process-39f94200c9da). [Accessed 10 February 2024].
 	2. "Stages of Boot Process", Ramesh Natarajan, The Geek Stuff, Feb 7 2011, [Online]. Available: [6 Stages of Linux Boot Process (Startup Sequence)](https://www.thegeekstuff.com/2011/02/linux-boot-process/). [Accessed 10 February 2024].
