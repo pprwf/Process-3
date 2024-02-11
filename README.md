@@ -53,6 +53,12 @@
   	- [Commands](#commands-used-to-manage-processes-in-linux)
 - [Services Manager](#services-manager)🤝
 - [Task Scheduler](#task-scheduler)⏳
+  	- [cron](#cron)
+  	- [crontab](#crontab)
+  	- [cronjab Syntax](#cronjab-syntax)
+  	- [at](#at)
+  	- [at Syntax](#at-syntax-&-usage)
+  	- [Time Format](#time-format)
 - [References](#references)🔗
 - [Group Member](#member)👪
 
@@ -309,17 +315,168 @@ Stage นี้จึงเป็น stage สุดท้ายของ Boot P
 
 ## ⏳Task Scheduler
 
+Linux มีตัวช่วยสำคัญในการทำงานตามคำสั่งโดยอัตโนมัติ ที่เรียกว่า _Task Scheduler_ เพื่อช่วยแก้ไขปัญหาที่ผู้ใช้งานจะต้องมาสั่งทำงานตาม Command ด้วยตัวเองตลอดเวลา โดยที่ Task Scheduler จะทำหน้าที่เสมือนตัวตั้งเวลา เพื่อตั้งเวลาสั่งให้ OS (Operating System) สามารถรับคำสั่งต่าง ๆ ที่ผู้ใช้งานต้องการได้เมื่อถึงเวลาที่กำหนดเอาไว้
+
+Task Scheduler สามารถสั่งเริ่มต้นการทำงานได้โดยผ่านคำสั่ง 2 คำสั่งคือ **Cron** หรือ **At** โดยทั้ง 2 คำสั่งเป็นคำสั่งที่ใช้เพื่อทำให้สามารถทำงานตามคำสั่งได้อย่างอัตโนมัติเมื่อถึงเวลาที่กำหนดเอาไว้
+
+### cron
+
+Cron เป็นเสมือนเครื่องมือที่ช่วยทำให้ระบบสามารถทำงานตามคำสั่งได้เมื่อถึงเวลาที่กำหนดเอาไว้ โดยจะไปดูงานใน Crontab File และจะทำงานในขณะที่ระบบบูทตัวเองขึ้นมาจาก /etc/init.d หรือ /etc/rc.d/init/d Script
+
+---
+
+### crontab
+
+Crontab ทำหน้าที่เป็น Script ที่คอยเก็บคำสั่งต่าง ๆ ที่ต้องการทำงานเอาไว้ โดยคำสั่งต่าง ๆ ภายใน Crontab จะถูกเรียกว่า **Cronjobs**
+
+#### Examples
+
+ผู้ใช้สามารถดู แก้ไข หรือ ลบ คำสั่งใน crontab ได้โดยใช้คำสั่ง ดังต่อไปนี้
+   ```bash
+   crontab -l ## ดูรายการ cronjob ต่างๆ
+   crontab -e ## เพื่อแก้ไขหรือเพิ่ม cronjob
+   crontab -r ## เพื่อลบ cronjob ออก
+   ```
+
+##### crontab -e
+เมื่อผู้ใช้สั่งดำเนินการคำสั่งนี้ ผู้ใช้จะเห็นหน้าต่างลักษณะดังภาพ ในหน้าต่างนี้สามารถแก้ไข เพิ่มหรือลบ job บางอย่างออกได้
+
+![crontab -e Command](/crontab-e.png)
+
+##### crontab -l
+เมื่อผู้ใช้สั่งดำเนินการคำสั่งนี้ จะได้ผลลัพธ์ที่คล้ายคลึงกับคำสั่ง _crontab -e_ แต่จะไม่สามารถแก้ไขหรือเพิ่มอะไรได้ ทำได้แค่ดูรายการคำสั่งเท่านั้น
+
+![crontab -l Command](/crontab-l.png)
+
+##### crontab -r
+ผู้ใช้สามารถลบ cronjob ทั้งหมดได้ด้วยคำสั่งดังต่อไปนี้
+
+![crontab -r Command](/crontab-r.png)
+
+### Cronjob Syntax
+Syntax ของคำสั่ง cronjob มีลักษณะคือ
+
+```bash
+* * * * * 'คำสั่งที่ต้องการรันหรือ path ไปหาคำสั่งของเรา'
+--------------------------------------------------
+| | | | | ==> ## วันต่างๆในสัปดาห์ (0-7)
+| | | | ==> ## เดือน (1-12)
+| | | ==> ## วันในเดือนต่างๆ (1-31)
+| | ==> ## ชั่วโมง (0-23)
+| ==> ## นาที (0-59)
+```
+
+นอกจากนี้ cronjob ยังรองรับการเขียน Shortcuts แทนการเขียนระบุเวลาแบบเต็ม ๆ ได้ ดังตาราง
+
+| Shortcut  | Descriptions | 
+| --------- | ------------ |
+| @reboot   | ให้รันคำสั่งทุกๆครั้งที่เครื่องทำการ reboot
+| @hourly   | ให้รันคำสั่งทุกๆชั่วโมง '0 * * * *'.
+| @daily    | ให้รันคำสั่งทุกๆวัน '0 0 * * *'
+| @midnight | ให้รันคำสั่งทุกๆเที่ยงคืนมีค่าเหมือนกับ @daily '0 0 * * *'
+| @weekly   | run command weekly '0 0 * * 0'
+| @monthly  | run command monthly '0 0 1 * *'
+| @yearly   | run command yearly '0 0 1 1 *'
+| @annually | run command yearly '0 0 1 1 *'
+
+---
+
+### At
+**at** เป็นคำสั่งที่มีความคล้ายคลึงกันกับคำสั่ง _cron_ แต่การใช้คำสั่ง _cron_ นั้นจะใช้งานในกรณีที่ต้องการทำงานคำสั่งซ้ำ ๆ ทุกครั้งที่เวลามาถึง ต่างจากการใช้คำสั่ง **at** ที่เมื่อถึงเวลาแล้วจะทำงานตามคำสั่งนั้นเพียงครั้งเดียวเท่านั้น
+
+แต่การใช้คำสั่ง **at** ผู้ใช้มีความจำเป็นที่จะต้องมีการติดตั้งคำสั่งดังกล่าวไว้ภายในระบบก่อน โดยสามารถทำการติดตั้งคำสั่ง at ได้ด้วยคำสั่ง
+
+```bash
+sudo apt-get update
+sudo apt-get install at
+```
+
+### At Syntax & Usage 
+ผู้ใช้ต้องเข้าไปที่ prompt ของคำสั่ง **at** เพื่อทำการเพิ่มคำสั่งต่าง ๆ ลงไปใน List ซึ่งหากต้องการออกจาก prompt สามารถทำได้โดยกดปุ่ม _Ctrl + D_ บนคีย์บอร์ด หรือผู้ใช้สามารถเพิ่มคำสั่งโดยตรงโดยไม่ต้องเข้า prompt โดยการใช้เครื่องหมาย **|** (ไปป์)
+
+```bash
+## การใช้งานคำสั่ง at
+at (เวลาที่ต้องการให้คำสั่งทำงาน) ## เข้าสู่ prompt
+คำสั่งที่ต้องการให้ทำงาน ## พิมพ์คำสั่งที่ต้องการ
+
+## หรือ
+echo 'path ไปหา script คำสั่ง' | at (เวลา)
+```
+
+ผู้ใช้ไม่จำเป็นต้องพิมพ์เวลาตามรูปแบบนาฬิกา และสามารถใช้ Format อื่น ๆเ พื่อเขียนในคำสั่ง **at** ได้
+
+#### Example
+
+```bash
+at 3pm ## ให้ทำงานในเวลา 15 นาฬิกา (บ่าย 3)
+at Tuesday ## ให้ทำงานในวันอังคาร
+at Tuesday + 10 minutes ## ให้ทำงานในอีก 10 นาทีของวันอังคาร
+at now ## ให้ทำงานตามคำสั่งนั้นทันที
+```
+
+### Time format
+| Time       | Descriptions  | 
+| :--------: | ------------- |
+| midnight   | ให้ทำงานเมื่อถึงเวลาเที่ยงคืน
+| teatime    | ให้ทำงานเมื่อถึงเวลา 16 นาฬิกา (4 โมงเย็น)
+| now        | ให้ทำงานทันที
+| YYMMDDhhmmss | ให้ทำงานในช่วงเวลาที่กำหนด (ปี, เดือน, วัน, ชั่วโมง, นาที, วินาที)
+| CCYYMMDDhhmmss | ให้ทำงานในช่วงเวลาที่กำหนด (ปี, เดือน, วัน, ชั่วโมง, นาที, วินาที)
+
+#### View at Command and Remove
+ผู้ใช้สามารถดู List คำสั่งต่าง ๆ ของคำสั่ง **at** หรือลบออกได้โดยใช้คำสั่งเหล่านี้
+
+```bash
+## ตรวจสอบ List คำสั่ง at
+at -l
+atq
+## ลบคำสั่ง at ที่ต้องการออก
+at -r (เลขประจำ job)
+```
+
+#### Example
+
+ตัวอย่างการใช้คำสั่ง **atq** และ **at -r**
+
+![atq Command](/atq.png) ![at -r Command](/at-r.png)
+
+ผู้ใช้สามารถตรวจสอบ List คำสั่งต่าง ๆ ที่รอการทำงานได้โดยใช้คำสั่ง **atq** และสามารถลบคำสั่งที่ต้องการได้โดยระบุหมายเลขประจำของคำสั่งที่ต้องการลบ (หมายเลขจะอยู่ทางด้านซ้ายของคำสั่ง)
+
+### At Command Arguments
+
+ผู้ใช้สามารถเพิ่ม Arguments หรือ Options ต่าง ๆ เพื่อใช้คำสั่ง at ทำบางอย่างเพิ่มเติมได้
+
+| Time       | Descriptions | Example command |
+| :--------: | ------------ | --------------- |
+| -d         | ลบคำสั่ง       | **at -d 2**     |
+| -f         | ไฟล์ที่ต้องการให้ทำงาน | **at -f eiei.sh Monday** |
+| -l         | แสดงคำสั่ง **at** ทั้งหมด | **at -l** |
+| -c         | แสดงเฉพาะคำสั่ง **at** ที่ต้องการ | **at -c 2**|
+
 ## 🔗References
 
-1. "Boot Process Fundamental", Bhuridech Sudsee, Medium, Jun 25 2017, [Online]. Available: [กระบวนการเริ่มทำงานของ Linux (Boot process)](https://aorjoa.medium.com/กระบวนการเริ่มทำงานของ-linux-boot-process-39f94200c9da). [Accessed 10 February 2024].
-2. "Stages of Boot Process", Ramesh Natarajan, The Geek Stuff, Feb 7 2011, [Online]. Available: [6 Stages of Linux Boot Process (Startup Sequence)](https://www.thegeekstuff.com/2011/02/linux-boot-process/). [Accessed 10 February 2024].
-3. "Linux Booting Process", FOXY🦊KNIGHT, Medium, Jul 5 2023, [Online]. Available: [Linux Booting Process](https://foxyknight29.medium.com/linux-booting-process-bb8f9036c43d). [Accessed 10 February 2024].
-4. "LILO (Linux Loader)", baeldung, Baeldung, Apr 20 2023, [Online]. Available: [Guide to the Boot Process of a Linux System](https://www.baeldung.com/linux/boot-process). [Accessed 10 February 2024].
-5. "Boot Processes", Harry, OPERAVPS, Jun 23 2022, [Online]. Available: [The Linux Booting Process: 6 Steps Explained in Detail](https://operavps.com/docs/linux-booting-process/). [Accessed 10 February 2024].
-6. "Process Types", Surajit Saha, Scaler, Jun 7 2023, [Online]. Available: [Types of Processes](https://www.scaler.com/topics/process-management-in-linux/ "Process States"). [Accessed 8 February 2024].
-7. "Process States", Shivani Goyal, unstop, Aug 25 2023, [Online]. Available: [Stages of a Process in Linux](https://unstop.com/blog/process-management-in-linux) [Accessed 9 February 2024].
-8. "Commands Used to Manage Processes in Linux", Jayant Verma, DigitalOcean, Aug 4 2022, [Online]. Available: [Commands for Process Management in Linux](https://www.digitalocean.com/community/tutorials/process-management-in-linux). [Accessed 9 February 2024].
-9. "Managing services in Linux," RimuHosting Ltd, [Online]. Available: https://rimuhosting.com/knowledgebase/linux/managing-services#:~:text=Services%20are%20programs%20or%20processes,services%20are%20Apache%20and%20Postfix. [Accessed 4 February 2024].
+- **Boot Process**
+	1. "Boot Process Fundamental", Bhuridech Sudsee, Medium, Jun 25 2017, [Online]. Available: [กระบวนการเริ่มทำงานของ Linux (Boot process)](https://aorjoa.medium.com/กระบวนการเริ่มทำงานของ-linux-boot-process-39f94200c9da). [Accessed 10 February 2024].
+	2. "Stages of Boot Process", Ramesh Natarajan, The Geek Stuff, Feb 7 2011, [Online]. Available: [6 Stages of Linux Boot Process (Startup Sequence)](https://www.thegeekstuff.com/2011/02/linux-boot-process/). [Accessed 10 February 2024].
+	3. "Linux Booting Process", FOXY🦊KNIGHT, Medium, Jul 5 2023, [Online]. Available: [Linux Booting Process](https://foxyknight29.medium.com/linux-booting-process-bb8f9036c43d). [Accessed 10 February 2024].
+	4. "LILO (Linux Loader)", baeldung, Baeldung, Apr 20 2023, [Online]. Available: [Guide to the Boot Process of a Linux System](https://www.baeldung.com/linux/boot-process). [Accessed 10 February 2024].
+	5. "Boot Processes", Harry, OPERAVPS, Jun 23 2022, [Online]. Available: [The Linux Booting Process: 6 Steps Explained in Detail](https://operavps.com/docs/linux-booting-process/). [Accessed 10 February 2024].
+- **Process Manager**
+ 	1. "Process Types", Surajit Saha, Scaler, Jun 7 2023, [Online]. Available: [Types of Processes](https://www.scaler.com/topics/process-management-in-linux/ "Process States"). [Accessed 8 February 2024].
+	2. "Process States", Shivani Goyal, unstop, Aug 25 2023, [Online]. Available: [Stages of a Process in Linux](https://unstop.com/blog/process-management-in-linux) [Accessed 9 February 2024].
+	3. "Commands Used to Manage Processes in Linux", Jayant Verma, DigitalOcean, Aug 4 2022, [Online]. Available: [Commands for Process Management in Linux](https://www.digitalocean.com/community/tutorials/process-management-in-linux). [Accessed 9 February 2024].
+- **Service Manager**
+  	1. "Managing services in Linux," RimuHosting Ltd, [Online]. Available: [Managing services in Linux](https://rimuhosting.com/knowledgebase/linux/managing-services#:~:text=Services%20are%20programs%20or%20processes,services%20are%20Apache%20and%20Postfix). [Accessed 4 February 2024].
+  	2. "Service Management," OpenEuler, [Online]. Available: (Service Management)[https://docs.openeuler.org/en/docs/22.03_LTS_SP1/docs/Administration/service-management.html#introduction-to-systemd]. [Accessed 4 February 2024].
+  	3. "askUbuntu," StackExchange, May 8 2017, [Online]. Available: (What is the difference between "systemctl start" and "systemctl enable"?)[https://askubuntu.com/questions/733469/what-is-the-difference-between-systemctl-start-and-systemctl-enable]. [Accessed 5 February 2024].
+  	4. "cgroups(7) — Linux manual page," Michael Kerrisk, man7, Dec 22 2023, [Online]. Available: (cgroups)[https://man7.org/linux/man-pages/man7/cgroups.7.html]. [Accessed 5 February 2024].
+  	5. "Unix & Linux", StackExchange, May 25 2015, [Online]. Available: (What's the difference between poweroff and halt?)[https://unix.stackexchange.com/questions/205464/whats-the-difference-between-poweroff-and-halt]. [Accessed 6 February 2024].
+- **Task Scheduler**
+  	1. "Schedule a Task", Sidratul Muntaha, linuxhint, 2021, [Online]. Available: [How to Schedule a Task in Linux?](https://linuxhint.com/schedule_linux_task/). [Accessed February 2024].
+  	2. "crontab", Rahul Awati, TechTarget, Feb 2023, [Online]. Available: [What is crontab?](https://www.techtarget.com/searchdatacenter/definition/crontab). [Accessed February 2024].
+  	3. "crontab on Linux", Pongpitta, Medium, Jun 7 2021, [Online]. Available: [การใช้งาน Crontab บน Linux/Server](https://pongpitta.medium.com/%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99-crontab-%E0%B8%9A%E0%B8%99-linux-server-6272d376ecdb). [Accessed February 2024].
+  	4. "at", GeeksForGeeks, Jul 03 2020, [Online]. Available: [at Command in Linux with Examples](https://www.geeksforgeeks.org/at-command-in-linux-with-examples/). [Accessed February 2024].
+  	5. "at", Seth Kenlon, opensource.com, Aug 15 2021, [Online]. Available: [Schedule a task with the Linux at command](https://opensource.com/article/21/8/linux-at-command). [Accessed February 2024].
 
 ## 👪Member
 
@@ -336,7 +493,7 @@ Stage นี้จึงเป็น stage สุดท้ายของ Boot P
 			<em>Duty: Process Manager</em>
 		</td>
 		<td align="center">
-			<strong>65070</strong> นายธัชพงศ์ 
+			<strong>65070104</strong> นายธัชพงศ์ ไพศาลธนภรณ์
 			<br>
 			<em>Duty: Task Scheduler / Project Manager</em>
 		</td>
