@@ -51,16 +51,16 @@
 1. Ps:
     * ps ย่อมาจาก "Process Status" ซึ่งแสดงกระบวนการที่กำลังทำงานอยู่ในขณะนั้น อย่างไรก็ตาม ต่างจากคำสั่ง top ผลลัพธ์ที่สร้างขึ้นไม่ใช่ใน      โหมดReal Time นั่นคือคุณจะไม่เห็นการอัปเดตข้อมูลอย่างต่อเนื่องเหมือนกับคำสั่ง top
     * คำสั่งหลัก
-    * !(https://github.com/pprwf/Process-3/blob/Simp/ps.png)
+    ![logo](https://github.com/pprwf/Process-3/blob/Simp/ps.png)
        * PID: Process ID
        * TTY: Terminal Type
        * TIME: เวลาทั้งหมดของ Process ที่รันแล้ว
        * CMD: ชื่อของคำสั่ง
     * ตัวเลือก:
         * -a: แสดงข้อมูลทุกกระบวนการ
-        * !(https://github.com/pprwf/Process-3/blob/Simp/ps_a.png)
+        ![logo](https://github.com/pprwf/Process-3/blob/Simp/ps_a.png)
         * -u: แสดงข้อมูลกระบวนการของผู้ใช้ที่ระบุ
-        * !(https://github.com/pprwf/Process-3/blob/Simp/ps_u.png)
+        ![logo](https://github.com/pprwf/Process-3/blob/Simp/ps_u.png)
         * -x: แสดงข้อมูลกระบวนการที่สิ้นสุดแล้ว
         * -l: แสดงข้อมูลแบบละเอียด
         * -o: กำหนดคอลัมน์ข้อมูลที่ต้องการแสดง
@@ -70,7 +70,7 @@
         * ps -x: แสดงข้อมูลกระบวนการที่สิ้นสุดแล้ว
 2. top:
     * ให้ข้อมูลเกี่ยวกับ System Process และการใช้ทรัพยากรแสดงรายการของกระบวนการที่กำลังทำงานในเวลาจริงพร้อมกับการใช้หน่วยความจำและ CPU
-    * !(https://github.com/pprwf/Process-3/blob/Simp/top.png)
+    ![logo](https://github.com/pprwf/Process-3/blob/Simp/top.png)
     * คำสั่งหลัก
        * PID: รหัสประจำตัวของกระบวนการแต่ละตัว
        * User: ชื่อผู้ใช้เจ้าของกระบวนการ
@@ -99,7 +99,7 @@
         * top -u root: แสดงข้อมูลกระบวนการของผู้ใช้ root
 3. kill:
     * สิ้นสุดกระบวนการโดยการส่งสัญญาณไปยังมัน
-    * !(https://github.com/pprwf/Process-3/blob/Simp/kill_l.png)
+    ![logo](https://github.com/pprwf/Process-3/blob/Simp/kill_l.png)
     * สัญญาณที่ใช้ทั่วไป:
         * SIGTERM: ยุติกระบวนการอย่างสุภาพ
         * SIGKILL: ยุติกระบวนการทันที
