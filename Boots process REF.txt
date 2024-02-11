@@ -1,0 +1,5 @@
+https://aorjoa.medium.com/กระบวนการเริ่มทำงานของ-linux-boot-process-39f94200c9da
+https://www.thegeekstuff.com/2011/02/linux-boot-process/
+https://foxyknight29.medium.com/linux-booting-process-bb8f9036c43d
+https://www.baeldung.com/linux/boot-process
+https://operavps.com/docs/linux-booting-process/
